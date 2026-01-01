@@ -29,7 +29,7 @@ Despite growing Bitcoin adoption, accurately forecasting cryptocurrency prices r
 2. **Data Understanding**: Comprehensive data quality assessment and exploration
 3. **Data Preparation**: Time series preprocessing, resampling, and feature engineering
 4. **Modeling**: Implementation of multiple forecasting approaches
-5. **Evaluation**: Quantitative metrics (MAE, MAPE, MSE) and visual validation
+5. **Evaluation**: Quantitative metrics (MAE, MSE) and visual validation
 6. **Deployment**: Production-ready forecasting pipeline
 
 ### Models Implemented
@@ -45,7 +45,9 @@ Despite growing Bitcoin adoption, accurately forecasting cryptocurrency prices r
 ### Data Processing
 - Timestamp conversion and indexing
 - Data resampling (minute → daily aggregation)
-- Stationarity testing and transformation
+- **Advanced Stationarity Testing**: ADF and KPSS tests
+- **Log Transformation**: Variance stabilization for high-volatility data
+- **Differencing**: Trend removal to achieve stationarity
 - Missing value handling
 
 ### Feature Engineering
@@ -65,6 +67,9 @@ Despite growing Bitcoin adoption, accurately forecasting cryptocurrency prices r
 
 ### Key Findings
 - Bitcoin prices exhibit non-stationarity requiring differencing
+- **Log transformation effectively stabilizes variance** in high-volatility periods
+- **KPSS and ADF tests provide robust stationarity confirmation**
+- **Log returns (differenced log prices) achieve stationarity** for modeling
 - High volatility makes short-term prediction challenging
 - [Additional findings to be added after analysis]
 
@@ -94,13 +99,27 @@ data['Timestamp'] = pd.to_datetime(data['Timestamp'], unit='s')
 daily_data = data.resample('D').agg({'Close': 'last'})
 ```
 
-2. **Stationarity Check**
+2. **Advanced Stationarity Testing**
 ```python
+# ADF Test
 from statsmodels.tsa.stattools import adfuller
-result = adfuller(daily_data['Close'])
+adf_result = adfuller(daily_data['Close'])
+
+# KPSS Test
+from statsmodels.tsa.stattools import kpss
+kpss_stat, p_value, lags, critical_values = kpss(daily_data['Close'])
 ```
 
-3. **Model Training**
+3. **Log Transformation & Differencing**
+```python
+# Log transformation for variance stabilization
+log_prices = np.log(daily_data['Close'])
+
+# First differencing for stationarity
+log_returns = log_prices.diff().dropna()
+```
+
+4. **Model Training**
 ```python
 from statsmodels.tsa.arima.model import ARIMA
 model = ARIMA(train_data, order=(1,1,1)).fit()
@@ -161,6 +180,8 @@ See `deployment.ipynb` for detailed deployment instructions.
 
 ## Future Enhancements
 
+- **State-space models (Kalman filtering)** for advanced preprocessing
+- **Variance-stabilizing transformations** (Box-Cox) as alternatives
 - Real-time data integration
 - Ensemble model combinations
 - Advanced deep learning architectures
@@ -174,7 +195,8 @@ See `deployment.ipynb` for detailed deployment instructions.
 **Analysis & Modeling:**
 - Python 3.10+
 - pandas, numpy, matplotlib
-- statsmodels, scikit-learn
+- **statsmodels** (ADF, KPSS, ARIMA)
+- scikit-learn
 - Jupyter Notebook
 
 **Deployment:**
@@ -186,7 +208,6 @@ See `deployment.ipynb` for detailed deployment instructions.
 ## Contributors
 
 - Billy Sambasi - Data Scientist
-- Project developed as part of Flatiron School Data Science Program
 
 ## License
 
