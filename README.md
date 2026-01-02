@@ -76,18 +76,20 @@ Despite growing Bitcoin adoption, accurately forecasting cryptocurrency prices r
 ## Project Structure
 
 ```
-Time Series/
-├── README.md
+time_series/
+├── README.md                # Project documentation
 ├── index.ipynb              # Main analysis notebook
 ├── deployment.ipynb         # Deployment documentation
-├── app/
+├── model.pkl               # Trained model (root level)
+├── .gitignore              # Git ignore file
+├── LICENSE                 # MIT License
+├── app/                    # API deployment folder
 │   ├── Dockerfile          # Container configuration
 │   ├── main.py            # FastAPI application
-│   ├── model.pkl          # Trained ML model
+│   ├── model.pkl          # Trained ML model (API copy)
 │   └── requirements.txt   # API dependencies
-├── data/
-│   └── bitcoin_historical_data.csv
-└── LICENSE
+└── data/
+    └── bitcoin_historical_data.csv  # Historical Bitcoin data (7.3M records)
 ```
 
 ## Usage
@@ -132,8 +134,9 @@ predictions = model.forecast(steps=len(test_data))
 The trained model is deployed as a REST API using FastAPI and Docker containerization.
 
 **API Endpoints:**
-- `GET /` - Health check
-- `POST /predict` - Bitcoin price prediction
+- `GET /` - Health check and API status
+- `POST /predict` - Single Bitcoin price prediction
+- `POST /predict_batch` - Batch Bitcoin price predictions
 
 **Quick Start:**
 ```bash
@@ -150,16 +153,16 @@ curl http://localhost:8000/docs
 **API Usage:**
 ```json
 {
-  "Open": 60000,
-  "High": 60500,
-  "Low": 59000,
-  "Volume": 123456,
-  "lag_1": 59800,
-  "lag_2": 59000,
-  "lag_3": 58500,
-  "lag_4": 58000,
-  "lag_5": 57500,
-  "lag_7": 56000
+  "Open": 60000.0,
+  "High": 60500.0,
+  "Low": 59000.0,
+  "Volume": 123456.0,
+  "lag_1": 59800.0,
+  "lag_2": 59000.0,
+  "lag_3": 58500.0,
+  "lag_4": 58000.0,
+  "lag_5": 57500.0,
+  "lag_7": 56000.0
 }
 ```
 
@@ -169,6 +172,9 @@ curl http://localhost:8000/docs
   "predicted_close": 59234.56
 }
 ```
+
+**Batch Prediction:**
+- `POST /predict_batch` - Multiple predictions in one request
 
 ### Cloud Deployment Options (Next Steps)
 - **AWS**: ECS, Lambda, or EC2
@@ -201,9 +207,11 @@ See `deployment.ipynb` for detailed deployment instructions.
 
 **Deployment:**
 - FastAPI for REST API
-- Docker for containerization
+- Docker for containerization  
 - uvicorn ASGI server
 - joblib for model serialization
+- Pydantic for data validation
+- Comprehensive logging
 
 ## Contributors
 
